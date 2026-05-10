@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Qiita Admin{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="flex min-h-screen">
+
+    <!-- サイドバー -->
+    <nav class="w-56 bg-gray-900 text-gray-300 flex flex-col flex-shrink-0">
+      <div class="px-6 py-5 border-b border-gray-700">
+        <h1 class="text-white font-bold text-sm tracking-wide">Qiita Admin</h1>
+      </div>
+      <ul class="mt-2 flex-1">
+        <li>
+          <a href="/articles"
+             class="flex items-center px-6 py-3 text-sm transition-colors
+                    {% if active_menu == 'articles' %}bg-blue-600 text-white{% else %}hover:bg-gray-700 hover:text-white{% endif %}">
+            記事一覧取得
+          </a>
+        </li>
+        {# 新機能のメニュー項目をここに追加 #}
+      </ul>
+    </nav>
+
+    <!-- メインコンテンツ -->
+    <div class="flex flex-col flex-1">
+      <header class="bg-white border-b border-gray-200 px-8 py-4 shadow-sm">
+        <h2 class="text-lg font-semibold">{% block page_title %}{% endblock %}</h2>
+      </header>
+      <main class="p-8 flex-1">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+
+  </div>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
