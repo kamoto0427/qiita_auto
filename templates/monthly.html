@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}月別投稿数 - Qiita Admin{% endblock %}
+{% block page_title %}月別投稿数グラフ{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+  <!-- サマリーカード -->
+  <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex items-center gap-4">
+    <div class="text-center px-6">
+      <div class="text-3xl font-bold text-blue-600" id="total-count">-</div>
+      <div class="text-xs text-gray-500 mt-1">総投稿数</div>
+    </div>
+    <div class="border-l border-gray-200 h-12"></div>
+    <div class="text-center px-6">
+      <div class="text-3xl font-bold text-gray-700" id="active-months">-</div>
+      <div class="text-xs text-gray-500 mt-1">投稿月数</div>
+    </div>
+    <div class="border-l border-gray-200 h-12"></div>
+    <div class="text-center px-6">
+      <div class="text-3xl font-bold text-gray-700" id="avg-per-month">-</div>
+      <div class="text-xs text-gray-500 mt-1">月平均投稿数</div>
+    </div>
+  </div>
+
+  <!-- グラフカード -->
+  <div class="bg-white rounded-xl shadow-sm p-6">
+    <div id="loading" class="text-center text-gray-400 py-12">データを取得中...</div>
+    <div id="error-msg" class="hidden text-center text-red-500 py-12"></div>
+    <canvas id="monthly-chart" class="hidden" height="120"></canvas>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/monthly.js"></script>
+{% endblock %}

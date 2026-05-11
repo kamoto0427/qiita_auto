@@ -87,6 +87,37 @@ async def api_ranking_stocks():
     return await _fetch_ranking("stocks_count")
 
 
+@app.get("/monthly", response_class=HTMLResponse)
+async def monthly_page():
+    return render("monthly.html", active_menu="monthly")
+
+
+@app.get("/api/monthly")
+async def api_monthly():
+    token = get_token()
+    if not token:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "message": "QIITA_TOKEN が設定されていません。.env を確認してください。"},
+        )
+    try:
+        articles = await asyncio.to_thread(fetch_all_articles, token)
+        monthly: dict[str, int] = {}
+        for a in articles:
+            month = a["created_at"][:7]
+            monthly[month] = monthly.get(month, 0) + 1
+        sorted_months = sorted(monthly.items())
+        return {
+            "status": "ok",
+            "total": len(articles),
+            "monthly": [{"month": m, "count": c} for m, c in sorted_months],
+        }
+    except QiitaAPIError as e:
+        return JSONResponse(status_code=401, content={"status": "error", "message": str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": f"予期しないエラー: {e}"})
+
+
 @app.get("/api/articles")
 async def api_articles():
     token = get_token()
