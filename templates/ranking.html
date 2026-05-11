@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}ランキング - Qiita Admin{% endblock %}
+{% block page_title %}ランキング{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+
+  <!-- タブ -->
+  <div class="flex border-b border-gray-200 mb-6">
+    <button id="tab-likes"
+            class="px-6 py-3 text-sm font-medium border-b-2 border-blue-600 text-blue-600 transition-colors"
+            onclick="switchTab('likes')">
+      いいね数ランキング
+    </button>
+    <button id="tab-stocks"
+            class="px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors"
+            onclick="switchTab('stocks')">
+      ストック数ランキング
+    </button>
+  </div>
+
+  <!-- ステータス -->
+  <p id="status-msg" class="text-sm text-gray-400 mb-4">取得中...</p>
+
+  <!-- サマリーカード -->
+  <div id="summary-area" class="hidden grid grid-cols-3 gap-4 mb-6">
+    <div class="bg-gray-50 rounded-lg p-4 text-center">
+      <p class="text-xs text-gray-500 mb-1">合計</p>
+      <p id="summary-total" class="text-2xl font-bold text-gray-800">-</p>
+    </div>
+    <div class="bg-gray-50 rounded-lg p-4 text-center">
+      <p class="text-xs text-gray-500 mb-1">平均</p>
+      <p id="summary-avg" class="text-2xl font-bold text-gray-800">-</p>
+    </div>
+    <div class="bg-gray-50 rounded-lg p-4 text-center">
+      <p class="text-xs text-gray-500 mb-1">最高</p>
+      <p id="summary-max" class="text-2xl font-bold text-gray-800">-</p>
+    </div>
+  </div>
+
+  <!-- ランキングテーブル -->
+  <div id="results-area" class="hidden">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="bg-gray-50 text-left text-gray-600">
+          <th class="px-4 py-2 border-b font-medium w-12">順位</th>
+          <th class="px-4 py-2 border-b font-medium">タイトル</th>
+          <th id="count-header" class="px-4 py-2 border-b font-medium w-24 text-right">いいね数</th>
+          <th class="px-4 py-2 border-b font-medium w-28">投稿日</th>
+          <th class="px-4 py-2 border-b font-medium w-16">URL</th>
+        </tr>
+      </thead>
+      <tbody id="ranking-tbody" class="divide-y divide-gray-100"></tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/ranking.js"></script>
+{% endblock %}
