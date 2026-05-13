@@ -40,6 +40,7 @@ def fetch_all_articles(token: str) -> list[dict]:
                 "created_at": item["created_at"],
                 "likes_count": item["likes_count"],
                 "stocks_count": item["stocks_count"],
+                "tags": [t["name"] for t in item.get("tags", [])],
             })
 
         page += 1

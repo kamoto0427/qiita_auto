@@ -118,6 +118,93 @@ async def api_monthly():
         return JSONResponse(status_code=500, content={"status": "error", "message": f"予期しないエラー: {e}"})
 
 
+@app.get("/prompt", response_class=HTMLResponse)
+async def prompt_page():
+    return render("prompt.html", active_menu="prompt")
+
+
+@app.get("/api/prompt")
+async def api_prompt():
+    token = get_token()
+    if not token:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "message": "QIITA_TOKEN が設定されていません。.env を確認してください。"},
+        )
+    try:
+        articles = await asyncio.to_thread(fetch_all_articles, token)
+        prompt_text = _generate_prompt(articles)
+        return {"status": "ok", "prompt": prompt_text}
+    except QiitaAPIError as e:
+        return JSONResponse(status_code=401, content={"status": "error", "message": str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": f"予期しないエラー: {e}"})
+
+
+def _generate_prompt(articles: list[dict]) -> str:
+    from collections import Counter
+
+    total = len(articles)
+
+    # 人気記事（いいね数上位5件）
+    top_likes = sorted(articles, key=lambda a: a["likes_count"], reverse=True)[:5]
+
+    # 頻出タグ（上位10件）
+    all_tags: list[str] = []
+    for a in articles:
+        all_tags.extend(a.get("tags", []))
+    tag_counts = Counter(all_tags).most_common(10)
+
+    # 全タイトル一覧
+    titles = [a["title"] for a in articles]
+
+    lines = [
+        "# Qiita記事分析レポート",
+        "",
+        f"## 基本情報",
+        f"- 総記事数: {total}件",
+        "",
+        "## 人気記事（いいね数トップ5）",
+    ]
+    for i, a in enumerate(top_likes, 1):
+        lines.append(f"{i}. {a['title']}（いいね: {a['likes_count']}、ストック: {a['stocks_count']}）")
+
+    lines += [
+        "",
+        "## 頻出タグ（使用回数順）",
+    ]
+    for tag, count in tag_counts:
+        lines.append(f"- {tag}: {count}回")
+
+    lines += [
+        "",
+        "## 既存記事タイトル一覧",
+    ]
+    for t in titles:
+        lines.append(f"- {t}")
+
+    lines += [
+        "",
+        "---",
+        "",
+        "## AIへの依頼文",
+        "",
+        "上記の情報を参考に、以下をお願いします。",
+        "",
+        "1. **新しい記事テーマの提案**",
+        "   - 既存記事と重複しない新しいテーマを10件提案してください。",
+        "   - 人気タグやトレンドを考慮してください。",
+        "",
+        "2. **記事タイトルの改善案**",
+        "   - いいね数が少ない記事のタイトルを、より魅力的に改善する案を提案してください。",
+        "",
+        "3. **未開拓テーマの発掘**",
+        "   - 頻出タグと関連するが、まだ書いていないテーマを提案してください。",
+    ]
+
+    return "\n".join(lines)
+
+
 @app.get("/api/articles")
 async def api_articles():
     token = get_token()
