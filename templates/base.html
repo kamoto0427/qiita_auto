@@ -29,6 +29,13 @@
             ランキング
           </a>
         </li>
+        <li>
+          <a href="/monthly"
+             class="flex items-center px-6 py-3 text-sm transition-colors
+                    {% if active_menu == 'monthly' %}bg-blue-600 text-white{% else %}hover:bg-gray-700 hover:text-white{% endif %}">
+            月別投稿数
+          </a>
+        </li>
         {# 新機能のメニュー項目をここに追加 #}
       </ul>
     </nav>
