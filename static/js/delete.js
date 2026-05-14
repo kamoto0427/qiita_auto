@@ -7,6 +7,10 @@ const resultsArea = document.getElementById('results-area');
 const tbody = document.getElementById('articles-tbody');
 const selectionInfo = document.getElementById('selection-info');
 const selectedCountEl = document.getElementById('selected-count');
+const filterArea = document.getElementById('filter-area');
+const filterLikes = document.getElementById('filter-likes');
+const filterStocks = document.getElementById('filter-stocks');
+const filterResult = document.getElementById('filter-result');
 
 let articles = [];
 
@@ -21,15 +25,70 @@ function updateSelectionCount() {
   deleteBtn.disabled = checked === 0;
 }
 
+// 表示中の行にフィルターを適用する（行の表示/非表示を切り替え）
+function applyFilter() {
+  const maxLikes = filterLikes.value !== '' ? parseInt(filterLikes.value, 10) : Infinity;
+  const maxStocks = filterStocks.value !== '' ? parseInt(filterStocks.value, 10) : Infinity;
+
+  let visibleCount = 0;
+  tbody.querySelectorAll('tr').forEach(row => {
+    const likes = parseInt(row.dataset.likes, 10);
+    const stocks = parseInt(row.dataset.stocks, 10);
+    const visible = likes <= maxLikes && stocks <= maxStocks;
+    row.classList.toggle('hidden', !visible);
+    if (visible) visibleCount++;
+  });
+
+  const total = articles.length;
+  if (maxLikes === Infinity && maxStocks === Infinity) {
+    filterResult.textContent = '';
+  } else {
+    filterResult.textContent = `${total} 件中 ${visibleCount} 件を表示中`;
+  }
+
+  updateSelectionCount();
+}
+
+filterLikes.addEventListener('input', applyFilter);
+filterStocks.addEventListener('input', applyFilter);
+
+document.getElementById('quick-zero-likes').addEventListener('click', () => {
+  filterLikes.value = '0';
+  filterStocks.value = '';
+  applyFilter();
+});
+
+document.getElementById('quick-zero-stocks').addEventListener('click', () => {
+  filterLikes.value = '';
+  filterStocks.value = '0';
+  applyFilter();
+});
+
+document.getElementById('quick-zero-both').addEventListener('click', () => {
+  filterLikes.value = '0';
+  filterStocks.value = '0';
+  applyFilter();
+});
+
+document.getElementById('filter-reset').addEventListener('click', () => {
+  filterLikes.value = '';
+  filterStocks.value = '';
+  applyFilter();
+});
+
 fetchBtn.addEventListener('click', async () => {
   fetchBtn.disabled = true;
   selectAllBtn.disabled = true;
   deselectAllBtn.disabled = true;
   deleteBtn.disabled = true;
   resultsArea.classList.add('hidden');
+  filterArea.classList.add('hidden');
   selectionInfo.classList.add('hidden');
   tbody.innerHTML = '';
   articles = [];
+  filterLikes.value = '';
+  filterStocks.value = '';
+  filterResult.textContent = '';
   setStatus('取得中...', 'text-gray-400');
 
   try {
@@ -48,6 +107,8 @@ fetchBtn.addEventListener('click', async () => {
       const tr = document.createElement('tr');
       tr.className = 'hover:bg-gray-50';
       tr.dataset.id = article.id;
+      tr.dataset.likes = article.likes_count;
+      tr.dataset.stocks = article.stocks_count;
       tr.innerHTML = `
         <td class="px-4 py-2 text-center">
           <input type="checkbox" class="article-checkbox w-4 h-4 cursor-pointer" data-id="${escapeHtml(article.id)}">
@@ -69,6 +130,7 @@ fetchBtn.addEventListener('click', async () => {
     });
 
     resultsArea.classList.remove('hidden');
+    filterArea.classList.remove('hidden');
     selectionInfo.classList.remove('hidden');
     selectAllBtn.disabled = false;
     deselectAllBtn.disabled = false;
@@ -81,8 +143,9 @@ fetchBtn.addEventListener('click', async () => {
   }
 });
 
+// すべて選択は表示中の行のみ対象
 selectAllBtn.addEventListener('click', () => {
-  tbody.querySelectorAll('.article-checkbox').forEach(cb => { cb.checked = true; });
+  tbody.querySelectorAll('tr:not(.hidden) .article-checkbox').forEach(cb => { cb.checked = true; });
   updateSelectionCount();
 });
 
@@ -121,11 +184,14 @@ deleteBtn.addEventListener('click', async () => {
       return;
     }
 
-    // 削除成功した行をテーブルから除去
     data.deleted.forEach(id => {
       const row = tbody.querySelector(`tr[data-id="${id}"]`);
       if (row) row.remove();
     });
+
+    // articles からも削除済みを除去
+    const deletedSet = new Set(data.deleted);
+    articles = articles.filter(a => !deletedSet.has(a.id));
 
     let msg = `${data.deleted_count} 件削除しました`;
     if (data.errors.length > 0) {
@@ -135,7 +201,7 @@ deleteBtn.addEventListener('click', async () => {
       setStatus(msg, 'text-green-600');
     }
 
-    updateSelectionCount();
+    applyFilter();
   } catch (e) {
     setStatus('通信エラーが発生しました', 'text-red-500');
   } finally {

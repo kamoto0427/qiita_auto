@@ -30,6 +30,42 @@
     <span id="status-msg" class="text-sm text-gray-500">「記事を取得する」を押してください</span>
   </div>
 
+  <!-- フィルターエリア -->
+  <div id="filter-area" class="hidden mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+    <div class="flex items-center gap-6 flex-wrap">
+      <span class="text-sm font-medium text-gray-700">絞り込み：</span>
+      <label class="flex items-center gap-2 text-sm text-gray-600">
+        いいね数 ≤
+        <input id="filter-likes" type="number" min="0" value="" placeholder="上限なし"
+               class="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+      </label>
+      <label class="flex items-center gap-2 text-sm text-gray-600">
+        ストック数 ≤
+        <input id="filter-stocks" type="number" min="0" value="" placeholder="上限なし"
+               class="w-24 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+      </label>
+      <div class="flex gap-2">
+        <button id="quick-zero-likes"
+                class="px-3 py-1 text-xs bg-orange-100 text-orange-700 rounded hover:bg-orange-200 transition-colors">
+          いいね0のみ
+        </button>
+        <button id="quick-zero-stocks"
+                class="px-3 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors">
+          ストック0のみ
+        </button>
+        <button id="quick-zero-both"
+                class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors">
+          両方0のみ
+        </button>
+        <button id="filter-reset"
+                class="px-3 py-1 text-xs bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition-colors">
+          リセット
+        </button>
+      </div>
+    </div>
+    <p id="filter-result" class="mt-2 text-xs text-gray-500"></p>
+  </div>
+
   <!-- 選択数表示 -->
   <div id="selection-info" class="hidden mb-3 text-sm text-gray-600">
     <span id="selected-count">0</span> 件選択中
