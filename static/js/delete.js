@@ -14,6 +14,21 @@ const filterResult = document.getElementById('filter-result');
 
 let articles = [];
 
+function showErrors(errors) {
+  clearErrors();
+  const box = document.createElement('div');
+  box.id = 'error-box';
+  box.className = 'mt-4 p-4 bg-red-50 border border-red-200 rounded text-sm text-red-700';
+  box.innerHTML = `<p class="font-medium mb-2">削除失敗の詳細：</p>` +
+    errors.map(e => `<p class="ml-2">・${escapeHtml(e.message)}</p>`).join('');
+  document.querySelector('.bg-white').appendChild(box);
+}
+
+function clearErrors() {
+  const existing = document.getElementById('error-box');
+  if (existing) existing.remove();
+}
+
 function setStatus(message, color = 'text-gray-500') {
   statusMsg.className = `text-sm ${color}`;
   statusMsg.textContent = message;
@@ -197,8 +212,10 @@ deleteBtn.addEventListener('click', async () => {
     if (data.errors.length > 0) {
       msg += `（${data.errors.length} 件失敗）`;
       setStatus(msg, 'text-yellow-600');
+      showErrors(data.errors);
     } else {
       setStatus(msg, 'text-green-600');
+      clearErrors();
     }
 
     applyFilter();

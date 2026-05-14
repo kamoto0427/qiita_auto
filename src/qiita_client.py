@@ -65,10 +65,17 @@ def delete_article(token: str, item_id: str) -> None:
         raise QiitaAPIError("トークンが無効です。Qiita のアクセストークンを確認してください。")
 
     if response.status_code == 403:
-        raise QiitaAPIError(f"記事 {item_id} を削除する権限がありません。")
+        raise QiitaAPIError(
+            f"記事 {item_id} を削除する権限がありません。"
+            " トークンに write_qiita スコープが必要です。"
+        )
 
     if response.status_code == 404:
         raise QiitaAPIError(f"記事 {item_id} が見つかりません。")
 
     if not response.ok:
-        raise QiitaAPIError(f"削除に失敗しました: {response.status_code}")
+        try:
+            detail = response.json().get("message", "")
+        except Exception:
+            detail = response.text[:200]
+        raise QiitaAPIError(f"削除に失敗しました (HTTP {response.status_code}): {detail}")
