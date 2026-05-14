@@ -3,11 +3,13 @@ import asyncio
 
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader
 from dotenv import load_dotenv
 
-from src.qiita_client import fetch_all_articles, QiitaAPIError
+from fastapi import Request
+from src.qiita_client import fetch_all_articles, delete_article, QiitaAPIError
 
 load_dotenv()
 
@@ -203,6 +205,46 @@ def _generate_prompt(articles: list[dict]) -> str:
     ]
 
     return "\n".join(lines)
+
+
+@app.get("/delete", response_class=HTMLResponse)
+async def delete_page():
+    return render("delete.html", active_menu="delete")
+
+
+class DeleteRequest(BaseModel):
+    item_ids: list[str]
+
+
+@app.post("/api/delete")
+async def api_delete(req: DeleteRequest):
+    token = get_token()
+    if not token:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "message": "QIITA_TOKEN が設定されていません。.env を確認してください。"},
+        )
+    if not req.item_ids:
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "message": "削除する記事が選択されていません。"},
+        )
+    deleted = []
+    errors = []
+    for item_id in req.item_ids:
+        try:
+            await asyncio.to_thread(delete_article, token, item_id)
+            deleted.append(item_id)
+        except QiitaAPIError as e:
+            errors.append({"id": item_id, "message": str(e)})
+        except Exception as e:
+            errors.append({"id": item_id, "message": f"予期しないエラー: {e}"})
+    return {
+        "status": "ok",
+        "deleted_count": len(deleted),
+        "deleted": deleted,
+        "errors": errors,
+    }
 
 
 @app.get("/api/articles")

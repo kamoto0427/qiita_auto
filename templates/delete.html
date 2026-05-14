@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}一括削除 - Qiita Admin{% endblock %}
+{% block page_title %}記事一括削除{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+
+  <!-- 操作エリア -->
+  <div class="flex items-center gap-4 mb-4 flex-wrap">
+    <button id="fetch-btn"
+            class="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+      記事を取得する
+    </button>
+    <button id="select-all-btn"
+            class="px-5 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled>
+      すべて選択
+    </button>
+    <button id="deselect-all-btn"
+            class="px-5 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled>
+      選択解除
+    </button>
+    <button id="delete-btn"
+            class="px-5 py-2 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled>
+      選択した記事を削除
+    </button>
+    <span id="status-msg" class="text-sm text-gray-500">「記事を取得する」を押してください</span>
+  </div>
+
+  <!-- 選択数表示 -->
+  <div id="selection-info" class="hidden mb-3 text-sm text-gray-600">
+    <span id="selected-count">0</span> 件選択中
+  </div>
+
+  <!-- テーブル -->
+  <div id="results-area" class="hidden">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="bg-gray-50 text-left text-gray-600">
+          <th class="px-4 py-2 border-b font-medium w-8">選択</th>
+          <th class="px-4 py-2 border-b font-medium">タイトル</th>
+          <th class="px-4 py-2 border-b font-medium w-20 text-center">いいね</th>
+          <th class="px-4 py-2 border-b font-medium w-20 text-center">ストック</th>
+          <th class="px-4 py-2 border-b font-medium w-32">投稿日</th>
+        </tr>
+      </thead>
+      <tbody id="articles-tbody" class="divide-y divide-gray-100"></tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/delete.js"></script>
+{% endblock %}

@@ -35,6 +35,7 @@ def fetch_all_articles(token: str) -> list[dict]:
 
         for item in items:
             articles.append({
+                "id": item["id"],
                 "title": item["title"],
                 "url": item["url"],
                 "created_at": item["created_at"],
@@ -46,3 +47,28 @@ def fetch_all_articles(token: str) -> list[dict]:
         page += 1
 
     return articles
+
+
+def delete_article(token: str, item_id: str) -> None:
+    """
+    Qiita API で記事を1件削除する。
+    成功時は None を返す。失敗時は QiitaAPIError を送出。
+    """
+    headers = {"Authorization": f"Bearer {token}"}
+    response = requests.delete(
+        f"https://qiita.com/api/v2/items/{item_id}",
+        headers=headers,
+        timeout=10,
+    )
+
+    if response.status_code == 401:
+        raise QiitaAPIError("トークンが無効です。Qiita のアクセストークンを確認してください。")
+
+    if response.status_code == 403:
+        raise QiitaAPIError(f"記事 {item_id} を削除する権限がありません。")
+
+    if response.status_code == 404:
+        raise QiitaAPIError(f"記事 {item_id} が見つかりません。")
+
+    if not response.ok:
+        raise QiitaAPIError(f"削除に失敗しました: {response.status_code}")
