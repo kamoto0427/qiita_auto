@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}プロンプト生成 - Qiita Admin{% endblock %}
+{% block page_title %}AI向けプロンプト生成{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+
+  <!-- 操作エリア -->
+  <div class="flex items-center gap-4 mb-4">
+    <button id="generate-btn"
+            class="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+      プロンプトを生成
+    </button>
+    <button id="copy-btn"
+            class="px-5 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled>
+      コピー
+    </button>
+    <span id="status-msg" class="text-sm text-gray-500">「プロンプトを生成」を押してください</span>
+  </div>
+
+  <!-- プロンプト出力エリア -->
+  <div id="results-area" class="hidden">
+    <textarea id="prompt-output"
+              class="w-full h-[32rem] p-4 font-mono text-sm border border-gray-200 rounded-lg bg-gray-50 resize-y focus:outline-none focus:ring-2 focus:ring-blue-300"
+              readonly></textarea>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/prompt.js"></script>
+{% endblock %}

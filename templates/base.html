@@ -36,6 +36,13 @@
             月別投稿数
           </a>
         </li>
+        <li>
+          <a href="/prompt"
+             class="flex items-center px-6 py-3 text-sm transition-colors
+                    {% if active_menu == 'prompt' %}bg-blue-600 text-white{% else %}hover:bg-gray-700 hover:text-white{% endif %}">
+            プロンプト生成
+          </a>
+        </li>
         {# 新機能のメニュー項目をここに追加 #}
       </ul>
     </nav>
