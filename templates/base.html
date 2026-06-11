@@ -50,6 +50,13 @@
             一括削除
           </a>
         </li>
+        <li>
+          <a href="/trending"
+             class="flex items-center px-6 py-3 text-sm transition-colors
+                    {% if active_menu == 'trending' %}bg-blue-600 text-white{% else %}hover:bg-gray-700 hover:text-white{% endif %}">
+            トレンド記事
+          </a>
+        </li>
         {# 新機能のメニュー項目をここに追加 #}
       </ul>
     </nav>

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}トレンド記事 - Qiita Admin{% endblock %}
+{% block page_title %}Claude Code 月間トレンド記事{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow p-6">
+
+  <!-- 説明 -->
+  <p class="text-sm text-gray-500 mb-4">
+    当月に投稿された ClaudeCode タグの記事をいいね数順で最大30件取得します。
+  </p>
+
+  <!-- 取得ボタン -->
+  <button id="fetch-btn"
+          onclick="fetchTrending()"
+          class="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 transition-colors mb-4">
+    取得
+  </button>
+
+  <!-- ステータス -->
+  <p id="status-msg" class="text-sm text-gray-400 mb-4"></p>
+
+  <!-- 記事テーブル -->
+  <div id="results-area" class="hidden">
+    <table class="w-full text-sm border-collapse">
+      <thead>
+        <tr class="bg-gray-50 text-left text-gray-600">
+          <th class="px-4 py-2 border-b font-medium">タイトル</th>
+          <th class="px-4 py-2 border-b font-medium w-20 text-right">いいね</th>
+          <th class="px-4 py-2 border-b font-medium w-20 text-right">ストック</th>
+          <th class="px-4 py-2 border-b font-medium w-32">作成者</th>
+          <th class="px-4 py-2 border-b font-medium">タグ</th>
+          <th class="px-4 py-2 border-b font-medium w-28">投稿日</th>
+        </tr>
+      </thead>
+      <tbody id="trending-tbody" class="divide-y divide-gray-100"></tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/trending.js"></script>
+{% endblock %}

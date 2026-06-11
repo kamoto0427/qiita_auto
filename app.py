@@ -1,7 +1,9 @@
 import os
 import asyncio
 
-from fastapi import FastAPI
+from collections import Counter
+
+from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
@@ -9,7 +11,7 @@ from jinja2 import Environment, FileSystemLoader
 from dotenv import load_dotenv
 
 from fastapi import Request
-from src.qiita_client import fetch_all_articles, delete_article, QiitaAPIError
+from src.qiita_client import fetch_all_articles, delete_article, search_articles, fetch_trending_articles, QiitaAPIError
 
 load_dotenv()
 
@@ -205,6 +207,82 @@ def _generate_prompt(articles: list[dict]) -> str:
     ]
 
     return "\n".join(lines)
+
+
+@app.get("/trending", response_class=HTMLResponse)
+async def trending_page():
+    return render("trending.html", active_menu="trending")
+
+
+@app.get("/api/trending")
+async def api_trending():
+    token = get_token()
+    if not token:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "message": "QIITA_TOKEN が設定されていません。.env を確認してください。"},
+        )
+    try:
+        articles = await asyncio.to_thread(fetch_trending_articles, token)
+        return {"status": "ok", "count": len(articles), "articles": articles}
+    except QiitaAPIError as e:
+        return JSONResponse(status_code=401, content={"status": "error", "message": str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": f"予期しないエラー: {e}"})
+
+
+@app.get("/trend", response_class=HTMLResponse)
+async def trend_page():
+    return render("trend.html", active_menu="trend")
+
+
+@app.get("/api/trend")
+async def api_trend(keyword: str = Query(..., description="検索キーワード")):
+    token = get_token()
+    if not token:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "message": "QIITA_TOKEN が設定されていません。.env を確認してください。"},
+        )
+    try:
+        articles = await asyncio.to_thread(search_articles, keyword, token)
+
+        # 月別投稿推移
+        monthly: dict[str, int] = {}
+        for a in articles:
+            month = a["created_at"][:7]
+            monthly[month] = monthly.get(month, 0) + 1
+        sorted_monthly = [{"month": m, "count": c} for m, c in sorted(monthly.items())]
+
+        # 共起タグ Top20
+        all_tags: list[str] = []
+        for a in articles:
+            all_tags.extend(a["tags"])
+        top_tags = [{"tag": t, "count": c} for t, c in Counter(all_tags).most_common(20)]
+
+        # 人気記事 Top10（いいね数順）
+        top_articles = sorted(articles, key=lambda a: a["likes_count"], reverse=True)[:10]
+
+        return {
+            "status": "ok",
+            "keyword": keyword,
+            "total": len(articles),
+            "monthly": sorted_monthly,
+            "top_tags": top_tags,
+            "top_articles": [
+                {
+                    "title": a["title"],
+                    "url": a["url"],
+                    "created_at": a["created_at"][:10],
+                    "likes_count": a["likes_count"],
+                }
+                for a in top_articles
+            ],
+        }
+    except QiitaAPIError as e:
+        return JSONResponse(status_code=401, content={"status": "error", "message": str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": f"予期しないエラー: {e}"})
 
 
 @app.get("/delete", response_class=HTMLResponse)
