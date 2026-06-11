@@ -43,6 +43,13 @@
             プロンプト生成
           </a>
         </li>
+        <li>
+          <a href="/delete"
+             class="flex items-center px-6 py-3 text-sm transition-colors
+                    {% if active_menu == 'delete' %}bg-blue-600 text-white{% else %}hover:bg-gray-700 hover:text-white{% endif %}">
+            一括削除
+          </a>
+        </li>
         {# 新機能のメニュー項目をここに追加 #}
       </ul>
     </nav>
