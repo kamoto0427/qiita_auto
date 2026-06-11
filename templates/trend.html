@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}AIトレンド分析 - Qiita Admin{% endblock %}
+{% block page_title %}AIトレンド分析{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+
+  <!-- キーワード選択 -->
+  <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <p class="text-sm text-gray-500 mb-3">分析するキーワードを選択してください</p>
+    <div class="flex flex-wrap gap-2 mb-4" id="preset-buttons">
+      <button data-keyword="Claude Code"
+              class="preset-btn px-4 py-2 rounded-full text-sm border border-gray-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors">
+        Claude Code
+      </button>
+      <button data-keyword="GitHub Copilot"
+              class="preset-btn px-4 py-2 rounded-full text-sm border border-gray-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors">
+        GitHub Copilot
+      </button>
+      <button data-keyword="Codex"
+              class="preset-btn px-4 py-2 rounded-full text-sm border border-gray-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors">
+        Codex
+      </button>
+      <button data-keyword="Cursor"
+              class="preset-btn px-4 py-2 rounded-full text-sm border border-gray-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors">
+        Cursor
+      </button>
+      <button data-keyword="ChatGPT"
+              class="preset-btn px-4 py-2 rounded-full text-sm border border-gray-300 hover:bg-blue-600 hover:text-white hover:border-blue-600 transition-colors">
+        ChatGPT
+      </button>
+    </div>
+  </div>
+
+  <!-- ローディング / エラー -->
+  <div id="loading" class="hidden text-center text-gray-400 py-12">データを取得中...</div>
+  <div id="error-msg" class="hidden text-center text-red-500 py-8"></div>
+
+  <!-- 結果エリア -->
+  <div id="result-area" class="hidden">
+
+    <!-- サマリー -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6 flex items-center gap-4">
+      <div class="text-center px-6">
+        <div class="text-3xl font-bold text-blue-600" id="total-count">-</div>
+        <div class="text-xs text-gray-500 mt-1">取得記事数</div>
+      </div>
+      <div class="border-l border-gray-200 h-12"></div>
+      <div class="text-center px-6">
+        <div class="text-2xl font-bold text-gray-700" id="current-keyword">-</div>
+        <div class="text-xs text-gray-500 mt-1">検索キーワード</div>
+      </div>
+    </div>
+
+    <!-- 月別投稿推移グラフ -->
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <h3 class="text-base font-semibold mb-4">月別投稿推移</h3>
+      <canvas id="trend-chart" height="100"></canvas>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+      <!-- 共起タグ Top20 -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="text-base font-semibold mb-4">共起タグ Top20</h3>
+        <ul id="tag-list" class="space-y-1 text-sm"></ul>
+      </div>
+
+      <!-- 人気記事 Top10 -->
+      <div class="bg-white rounded-xl shadow-sm p-6">
+        <h3 class="text-base font-semibold mb-4">人気記事 Top10（いいね数順）</h3>
+        <div class="overflow-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-gray-500 border-b">
+                <th class="pb-2 pr-2">#</th>
+                <th class="pb-2 pr-2">タイトル</th>
+                <th class="pb-2 text-right">いいね</th>
+              </tr>
+            </thead>
+            <tbody id="articles-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/trend.js"></script>
+{% endblock %}
