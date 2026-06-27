@@ -1,6 +1,9 @@
-Issue番号 $ARGUMENTS のIssueを読み取り、実装してPRを作成してください。
+---
+name: issue
+description: issue番号 $ARGUMENTS のissueを読み取り、実装してPRを作成する。
+---
 
-手順：
+## 手順
 1. GitHub MCPを使い、リポジトリ kamoto0427/qiita_auto の Issue $ARGUMENTS を取得する
 2. Issueのタイトル・本文・ラベルを確認して要件を把握する
 3. 現在のブランチを確認し、`feature/issue-$ARGUMENTS` ブランチを作成して切り替える
