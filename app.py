@@ -326,7 +326,7 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
     query_display = req.query
 
     lines = [
-        f"# 【{period_label}版】{query_display} 関連記事まとめ｜人気記事ランキングTOP10",
+        f"# 【{period_label}版】{query_display} 関連記事まとめ TOP10",
         "",
         f"{query_display} 関連の記事を人気順でまとめました。",
         "",
@@ -339,7 +339,7 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
         "",
         "---",
         "",
-        "## ランキング",
+        "## 記事一覧",
         "",
     ]
 
@@ -373,7 +373,7 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
         all_tags.extend(a["tags"])
     tag_counts = Counter(all_tags).most_common(10)
 
-    lines += ["## 人気タグランキング", ""]
+    lines += ["## 人気タグ", ""]
     lines.append("| 順位 | タグ | 記事数 |")
     lines.append("| --- | --- | --- |")
     for rank, (tag, count) in enumerate(tag_counts, 1):
@@ -397,7 +397,7 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
         reverse=True,
     )[:10]
 
-    lines += ["## 人気著者ランキング", ""]
+    lines += ["## 人気著者", ""]
     lines.append("| 順位 | 著者 | 記事数 | 総いいね |")
     lines.append("| --- | --- | --- | --- |")
     for rank, s in enumerate(author_stats, 1):
@@ -415,7 +415,7 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
             return 0.0
 
     rising = sorted(articles, key=engagement_velocity, reverse=True)[:5]
-    lines += ["## 今週急上昇記事", ""]
+    lines += ["## 急上昇記事", ""]
     lines.append("| 記事 | いいね | ストック |")
     lines.append("| --- | --- | --- |")
     for a in rising:
@@ -438,10 +438,6 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
         f"* 総ストック数：{total_stocks:,}",
         f"* 最も使われたタグ：{top_tag}",
         f"* 最も人気だった記事：{top_article}",
-        "",
-        "---",
-        "",
-        f"最終更新：{today_str}",
         "",
         "---",
         "",
