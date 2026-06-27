@@ -9,7 +9,7 @@ from jinja2 import Environment, FileSystemLoader
 from dotenv import load_dotenv
 
 from fastapi import Request
-from src.qiita_client import fetch_all_articles, delete_article, QiitaAPIError
+from src.qiita_client import fetch_all_articles, delete_article, fetch_trend_articles, QiitaAPIError
 
 load_dotenv()
 
@@ -245,6 +245,207 @@ async def api_delete(req: DeleteRequest):
         "deleted": deleted,
         "errors": errors,
     }
+
+
+@app.get("/trend-article", response_class=HTMLResponse)
+async def trend_article_page():
+    return render("trend_article.html", active_menu="trend_article")
+
+
+class TrendArticleRequest(BaseModel):
+    query: str
+    date_from: str = ""
+    date_to: str = ""
+    min_likes: int = 10
+    min_stocks: int = 10
+
+
+@app.post("/api/trend-article")
+async def api_trend_article(req: TrendArticleRequest):
+    token = get_token()
+    if not token:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "message": "QIITA_TOKEN が設定されていません。.env を確認してください。"},
+        )
+    if not req.query.strip():
+        return JSONResponse(
+            status_code=400,
+            content={"status": "error", "message": "検索キーワードまたはタグを入力してください。"},
+        )
+    try:
+        articles = await asyncio.to_thread(
+            fetch_trend_articles,
+            token,
+            req.query,
+            req.date_from or None,
+            req.date_to or None,
+        )
+        # いいね・ストックフィルター
+        filtered = [
+            a for a in articles
+            if a["likes_count"] >= req.min_likes and a["stocks_count"] >= req.min_stocks
+        ]
+        markdown = _generate_trend_markdown(filtered, req)
+        return {
+            "status": "ok",
+            "total_fetched": len(articles),
+            "total_filtered": len(filtered),
+            "markdown": markdown,
+        }
+    except QiitaAPIError as e:
+        return JSONResponse(status_code=401, content={"status": "error", "message": str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": f"予期しないエラー: {e}"})
+
+
+def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -> str:
+    from collections import Counter
+    from datetime import datetime, timezone
+
+    if not articles:
+        return "# 該当記事なし\n\n条件に一致する記事が見つかりませんでした。"
+
+    now = datetime.now(timezone.utc)
+
+    # スコア = いいね + ストック
+    scored = sorted(articles, key=lambda a: a["likes_count"] + a["stocks_count"], reverse=True)
+
+    # 期間ラベル
+    period_label = ""
+    if req.date_from and req.date_to:
+        period_label = f"{req.date_from} 〜 {req.date_to}"
+    elif req.date_from:
+        period_label = f"{req.date_from} 以降"
+    elif req.date_to:
+        period_label = f"{req.date_to} 以前"
+    else:
+        period_label = "全期間"
+
+    today_str = now.strftime("%Y-%m-%d")
+    query_display = req.query
+
+    lines = [
+        f"# 【{period_label}版】{query_display} 関連記事まとめ｜人気記事ランキングTOP10",
+        "",
+        f"{query_display} 関連の記事を人気順でまとめました。",
+        "",
+        "## 集計条件",
+        "",
+        f"* 期間：{period_label}",
+        "* ソート：いいね数 + ストック数",
+        f"* 対象：{query_display} に関連する記事",
+        f"* 最低いいね数：{req.min_likes}以上 / 最低ストック数：{req.min_stocks}以上",
+        "",
+        "---",
+        "",
+        "## ランキング",
+        "",
+    ]
+
+    top10 = scored[:10]
+    ordinal = ["1位", "2位", "3位", "4位", "5位", "6位", "7位", "8位", "9位", "10位"]
+    for i, a in enumerate(top10):
+        rank_label = ordinal[i] if i < len(ordinal) else f"{i+1}位"
+        tags_str = " / ".join(a["tags"]) if a["tags"] else "-"
+        author_url = f"https://qiita.com/{a['user']}"
+        post_date = a["created_at"][:10]
+        lines += [
+            f"### {rank_label}",
+            "",
+            f"#### [{a['title']}]({a['url']})",
+            "",
+            "| 項目 | 内容 |",
+            "| --- | --- |",
+            f"| 著者 | @{a['user']} |",
+            f"| 投稿日 | {post_date} |",
+            f"| いいね | {a['likes_count']} |",
+            f"| ストック | {a['stocks_count']} |",
+            f"| コメント | {a['comments_count']} |",
+            f"| タグ | {tags_str} |",
+            f"| 著者ページ | [{author_url}]({author_url}) |",
+            "",
+            "---",
+            "",
+        ]
+
+    # タグランキング
+    all_tags: list[str] = []
+    for a in articles:
+        all_tags.extend(a["tags"])
+    tag_counts = Counter(all_tags).most_common(10)
+
+    lines += ["## 人気タグランキング", ""]
+    lines.append("| 順位 | タグ | 記事数 |")
+    lines.append("| --- | --- | --- |")
+    for rank, (tag, count) in enumerate(tag_counts, 1):
+        lines.append(f"| {rank} | {tag} | {count} |")
+    lines += ["", "---", ""]
+
+    # 著者ランキング
+    author_articles: dict[str, list] = {}
+    for a in articles:
+        author_articles.setdefault(a["user"], []).append(a)
+    author_stats = sorted(
+        [
+            {
+                "user": user,
+                "count": len(arts),
+                "total_likes": sum(a["likes_count"] for a in arts),
+            }
+            for user, arts in author_articles.items()
+        ],
+        key=lambda x: (x["total_likes"], x["count"]),
+        reverse=True,
+    )[:10]
+
+    lines += ["## 人気著者ランキング", ""]
+    lines.append("| 順位 | 著者 | 記事数 | 総いいね |")
+    lines.append("| --- | --- | --- | --- |")
+    for rank, s in enumerate(author_stats, 1):
+        lines.append(f"| {rank} | @{s['user']} | {s['count']} | {s['total_likes']:,} |")
+    lines += ["", "---", ""]
+
+    # 急上昇記事（エンゲージメント速度が高い記事）
+    def engagement_velocity(a: dict) -> float:
+        try:
+            posted = datetime.fromisoformat(a["created_at"].replace("Z", "+00:00"))
+            days = max((now - posted).days, 1)
+            return (a["likes_count"] + a["stocks_count"]) / days
+        except Exception:
+            return 0.0
+
+    rising = sorted(articles, key=engagement_velocity, reverse=True)[:5]
+    lines += ["## 今週急上昇記事", ""]
+    lines.append("| 記事 | いいね | ストック |")
+    lines.append("| --- | --- | --- |")
+    for a in rising:
+        lines.append(f"| [{a['title']}]({a['url']}) | {a['likes_count']} | {a['stocks_count']} |")
+    lines += ["", "---", ""]
+
+    # データサマリー
+    total_likes = sum(a["likes_count"] for a in articles)
+    total_stocks = sum(a["stocks_count"] for a in articles)
+    top_tag = tag_counts[0][0] if tag_counts else "-"
+    top_article = scored[0]["title"] if scored else "-"
+    authors_count = len(set(a["user"] for a in articles))
+
+    lines += [
+        "## データサマリー",
+        "",
+        f"* 対象記事数：{len(articles)}件",
+        f"* 対象著者数：{authors_count}名",
+        f"* 総いいね数：{total_likes:,}",
+        f"* 総ストック数：{total_stocks:,}",
+        f"* 最も使われたタグ：{top_tag}",
+        f"* 最も人気だった記事：{top_article}",
+        "",
+        "---",
+        "",
+        f"最終更新：{today_str}",
+    ]
+
+    return "\n".join(lines)
 
 
 @app.get("/api/articles")
