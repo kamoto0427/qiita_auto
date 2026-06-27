@@ -35,7 +35,8 @@ generateBtn.addEventListener('click', async () => {
   }
 
   generateBtn.disabled = true;
-  statusMsg.textContent = '記事を取得中...';
+  generateBtn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 align-middle"></span>取得中...';
+  statusMsg.textContent = '記事を取得中です。しばらくお待ちください...';
   statusMsg.className = 'text-sm text-gray-500';
   resultsArea.classList.add('hidden');
 
@@ -75,6 +76,7 @@ generateBtn.addEventListener('click', async () => {
     statusMsg.className = 'text-sm text-red-500';
   } finally {
     generateBtn.disabled = false;
+    generateBtn.textContent = '記事を生成';
   }
 });
 
