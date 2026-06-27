@@ -344,26 +344,24 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
     ]
 
     top10 = scored[:10]
-    ordinal = ["1位", "2位", "3位", "4位", "5位", "6位", "7位", "8位", "9位", "10位"]
     for i, a in enumerate(top10):
-        rank_label = ordinal[i] if i < len(ordinal) else f"{i+1}位"
+        article_label = f"記事{i + 1}"
         tags_str = " / ".join(a["tags"]) if a["tags"] else "-"
         author_url = f"https://qiita.com/{a['user']}"
         post_date = a["created_at"][:10]
         lines += [
-            f"### {rank_label}",
+            f"### {article_label}",
             "",
             f"#### [{a['title']}]({a['url']})",
             "",
             "| 項目 | 内容 |",
             "| --- | --- |",
-            f"| 著者 | @{a['user']} |",
+            f"| 著者 | [@{a['user']}]({author_url}) |",
             f"| 投稿日 | {post_date} |",
             f"| いいね | {a['likes_count']} |",
             f"| ストック | {a['stocks_count']} |",
             f"| コメント | {a['comments_count']} |",
             f"| タグ | {tags_str} |",
-            f"| 著者ページ | [{author_url}]({author_url}) |",
             "",
             "---",
             "",
@@ -403,7 +401,8 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
     lines.append("| 順位 | 著者 | 記事数 | 総いいね |")
     lines.append("| --- | --- | --- | --- |")
     for rank, s in enumerate(author_stats, 1):
-        lines.append(f"| {rank} | @{s['user']} | {s['count']} | {s['total_likes']:,} |")
+        author_url = f"https://qiita.com/{s['user']}"
+        lines.append(f"| {rank} | [@{s['user']}]({author_url}) | {s['count']} | {s['total_likes']:,} |")
     lines += ["", "---", ""]
 
     # 急上昇記事（エンゲージメント速度が高い記事）
@@ -443,6 +442,14 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
         "---",
         "",
         f"最終更新：{today_str}",
+        "",
+        "---",
+        "",
+        "::: note info",
+        "エンジニアなら読むべき本を30冊以上紹介しています。",
+        "正直、私の仕事のやり方をガラッと変えた神本やSQLのチューニングに悩んだ時にめちゃくちゃ役に立ったもあります👇",
+        "[→記事を読む\n](https://www.kamome-susume.com/recommended-books-for-engineers/)",
+        ":::",
     ]
 
     return "\n".join(lines)

@@ -7,8 +7,22 @@ const markdownRaw    = document.getElementById('markdown-raw');
 const markdownPreview = document.getElementById('markdown-preview');
 const copyBtn     = document.getElementById('copy-btn');
 
+// プルダウンで「その他」選択時にカスタム入力欄を表示
+document.getElementById('query-select').addEventListener('change', (e) => {
+  const custom = document.getElementById('query-custom');
+  if (e.target.value === '__custom__') {
+    custom.classList.remove('hidden');
+    custom.focus();
+  } else {
+    custom.classList.add('hidden');
+  }
+});
+
 generateBtn.addEventListener('click', async () => {
-  const query     = document.getElementById('query-input').value.trim();
+  const select    = document.getElementById('query-select');
+  const query     = select.value === '__custom__'
+    ? document.getElementById('query-custom').value.trim()
+    : select.value;
   const dateFrom  = document.getElementById('date-from').value;
   const dateTo    = document.getElementById('date-to').value;
   const minLikes  = parseInt(document.getElementById('min-likes').value, 10) || 0;

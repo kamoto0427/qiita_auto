@@ -53,8 +53,8 @@ def fetch_trend_articles(token: str, query: str, date_from: str = None, date_to:
     """
     Qiita API で公開記事を検索して取得する。
     query: 検索クエリ文字列 (例: "tag:ClaudeCode", "Claude Code")
-    date_from: YYYY-MM (開始年月、含む)
-    date_to:   YYYY-MM (終了年月、含む)
+    date_from: YYYY-MM-DD (開始日、含む)
+    date_to:   YYYY-MM-DD (終了日、含む)
     返却: 記事情報のリスト
     """
     headers = {"Authorization": f"Bearer {token}"} if token else {}
@@ -63,14 +63,9 @@ def fetch_trend_articles(token: str, query: str, date_from: str = None, date_to:
 
     search_query = query.strip()
     if date_from:
-        search_query += f" created:>={date_from}-01"
+        search_query += f" created:>={date_from}"
     if date_to:
-        year, month = map(int, date_to.split("-"))
-        if month == 12:
-            next_year, next_month = year + 1, 1
-        else:
-            next_year, next_month = year, month + 1
-        search_query += f" created:<{next_year:04d}-{next_month:02d}-01"
+        search_query += f" created:<={date_to}"
 
     while page <= 10:  # 最大 1000 件
         response = requests.get(
