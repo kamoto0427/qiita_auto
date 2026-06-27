@@ -326,7 +326,7 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
     query_display = req.query
 
     lines = [
-        f"# 【{period_label}版】{query_display} 関連記事まとめ TOP10",
+        f"# 【{period_label}】【{query_display}】急上昇人気記事まとめTOP10",
         "",
         f"{query_display} 関連の記事を人気順でまとめました。",
         "",
