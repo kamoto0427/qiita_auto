@@ -49,6 +49,60 @@ def fetch_all_articles(token: str) -> list[dict]:
     return articles
 
 
+def fetch_trend_articles(token: str, query: str, date_from: str = None, date_to: str = None) -> list[dict]:
+    """
+    Qiita API で公開記事を検索して取得する。
+    query: 検索クエリ文字列 (例: "tag:ClaudeCode", "Claude Code")
+    date_from: YYYY-MM-DD (開始日、含む)
+    date_to:   YYYY-MM-DD (終了日、含む)
+    返却: 記事情報のリスト
+    """
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    articles = []
+    page = 1
+
+    search_query = query.strip()
+    if date_from:
+        search_query += f" created:>={date_from}"
+    if date_to:
+        search_query += f" created:<={date_to}"
+
+    while page <= 10:  # 最大 1000 件
+        response = requests.get(
+            "https://qiita.com/api/v2/items",
+            headers=headers,
+            params={"query": search_query, "per_page": 100, "page": page},
+            timeout=15,
+        )
+
+        if response.status_code == 401:
+            raise QiitaAPIError("トークンが無効です。Qiita のアクセストークンを確認してください。")
+
+        if not response.ok:
+            raise QiitaAPIError(f"通信エラー: {response.status_code}")
+
+        items = response.json()
+        if not items:
+            break
+
+        for item in items:
+            articles.append({
+                "id": item["id"],
+                "title": item["title"],
+                "url": item["url"],
+                "created_at": item["created_at"],
+                "likes_count": item.get("likes_count", 0),
+                "stocks_count": item.get("stocks_count", 0),
+                "comments_count": item.get("comments_count", 0),
+                "tags": [t["name"] for t in item.get("tags", [])],
+                "user": item.get("user", {}).get("id", ""),
+            })
+
+        page += 1
+
+    return articles
+
+
 def delete_article(token: str, item_id: str) -> None:
     """
     Qiita API で記事を1件削除する。
