@@ -1,10 +1,10 @@
 ---
 name: requirements
 description: ユーザーの要望をもとに要件定義書を作成する。「要件定義して」「要件をまとめて」「何を作るか整理して」と言われたときに使う。
-allowed-tools: Read, Grep, Glob, AskUserQuestion
+allowed-tools: Read, Grep, Glob
 ---
 
-# requirements agentスキル：要件定義書の作成
+# requirements skills：要件定義書の作成
 ユーザーの要望をもとに要件定義書を作成してください。
 
 ## 手順
