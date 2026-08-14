@@ -17,9 +17,12 @@
       <ul class="mt-2 flex-1">
         <li>
           <a href="/articles"
-             class="flex items-center px-6 py-3 text-sm transition-colors
+             class="flex items-center gap-2 px-6 py-3 text-sm transition-colors
                     {% if active_menu == 'articles' %}bg-blue-600 text-white{% else %}hover:bg-gray-700 hover:text-white{% endif %}">
             記事一覧取得
+            <span id="article-count-badge"
+                  class="hidden ml-auto bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded-full min-w-[1.5rem] text-center">
+            </span>
           </a>
         </li>
         <li>
@@ -72,6 +75,24 @@
     </div>
 
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const badge = document.getElementById('article-count-badge');
+      if (!badge) return;
+
+      fetch('/api/articles')
+        .then(res => {
+          if (!res.ok) return null;
+          return res.json();
+        })
+        .then(data => {
+          if (!data || data.status !== 'ok') return;
+          badge.textContent = data.count;
+          badge.classList.remove('hidden');
+        })
+        .catch(() => {});
+    });
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>
