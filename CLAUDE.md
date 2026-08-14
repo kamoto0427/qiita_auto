@@ -49,10 +49,9 @@ Qiita API トークンを `.env` に設定するだけで即起動でき、ロ�
 
 | ユーザーの発言例 | 使うスキル | ファイル |
 |----------------|-----------|---------|
-| 「要件定義して」「何を作るか整理して」「要件をまとめて」 | requirements | `.claude/skills/requirements/SKILL.md` |
-| 「設計して」「計画を立てて」「要件定義から始めて」「要件定義や詳細設計を作成したい」 | plan | `.claude/skills/plan/SKILL.md` |
+| 「要件定義して」「設計して」「計画を立てて」「何を作るか整理して」など | plan | `.claude/skills/plan/SKILL.md` |
 
-> **plan** は requirements スキル → design サブエージェントを一気通貫で呼び出す統合スキルです。迷ったら plan を使ってください。
+> **plan** はヒアリング → 要件定義 → design サブエージェントを一気通貫で実行する統合スキルです。迷ったら plan を使ってください。
 
 ### 設計・計画系（`.claude/agents/` 配下）
 
