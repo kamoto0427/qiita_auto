@@ -70,16 +70,17 @@ async function loadDiff() {
 snapshotBtn.addEventListener('click', async () => {
   snapshotBtn.disabled = true;
   snapshotBtn.textContent = '記録中...';
+  diffContent.innerHTML = '<p class="text-sm text-gray-400">記録中...</p>';
   try {
     const res = await fetch('/api/snapshot/save', { method: 'POST' });
     const data = await res.json();
     if (data.status === 'error') {
-      alert(data.message);
+      diffContent.innerHTML = `<p class="text-sm text-red-500">${escapeHtml(data.message)}</p>`;
       return;
     }
-    await loadDiff();
+    renderDiff(data);
   } catch (e) {
-    alert('通信エラーが発生しました');
+    diffContent.innerHTML = '<p class="text-sm text-red-500">通信エラーが発生しました</p>';
   } finally {
     snapshotBtn.disabled = false;
     snapshotBtn.textContent = '記録';

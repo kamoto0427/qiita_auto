@@ -485,7 +485,14 @@ async def api_snapshot_save():
         articles = await asyncio.to_thread(fetch_all_articles, token)
         await asyncio.to_thread(save_snapshot, articles)
         snapshot = load_snapshot()
-        return {"status": "ok", "saved_at": snapshot["saved_at"], "count": len(articles)}
+        diffs = calc_diff(articles, snapshot)
+        return {
+            "status": "ok",
+            "saved_at": snapshot["saved_at"],
+            "count": len(articles),
+            "snapshot_exists": True,
+            "diffs": diffs,
+        }
     except QiitaAPIError as e:
         return JSONResponse(status_code=401, content={"status": "error", "message": str(e)})
     except Exception as e:
