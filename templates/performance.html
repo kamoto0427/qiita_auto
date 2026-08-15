@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}前週比パフォーマンス - Qiita Admin{% endblock %}
+{% block page_title %}前週比パフォーマンス{% endblock %}
+
+{% block content %}
+
+<div class="bg-white rounded-lg shadow p-6">
+  <div class="flex items-center justify-between mb-3">
+    <div>
+      <p id="snapshot-date" class="text-xs text-gray-400 mt-0.5"></p>
+    </div>
+    <button id="snapshot-btn"
+            class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+      記録
+    </button>
+  </div>
+  <div id="diff-content">
+    <p class="text-sm text-gray-400">読み込み中...</p>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/performance.js"></script>
+{% endblock %}
