@@ -38,6 +38,11 @@ async def articles_page():
     return render("articles.html", active_menu="articles")
 
 
+@app.get("/performance", response_class=HTMLResponse)
+async def performance_page():
+    return render("performance.html", active_menu="performance")
+
+
 @app.get("/ranking", response_class=HTMLResponse)
 async def ranking_page():
     return render("ranking.html", active_menu="ranking")
