@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from fastapi import Request
 from src.qiita_client import fetch_all_articles, delete_article, fetch_trend_articles, QiitaAPIError
+from src.snapshot import load_snapshot, save_snapshot, calc_diff
 
 load_dotenv()
 
@@ -449,6 +450,46 @@ def _generate_trend_markdown(articles: list[dict], req: "TrendArticleRequest") -
     ]
 
     return "\n".join(lines)
+
+
+@app.get("/api/snapshot/diff")
+async def api_snapshot_diff():
+    token = get_token()
+    if not token:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "message": "QIITA_TOKEN が設定されていません。.env を確認してください。"},
+        )
+    try:
+        articles = await asyncio.to_thread(fetch_all_articles, token)
+        snapshot = load_snapshot()
+        if snapshot is None:
+            return {"status": "ok", "snapshot_exists": False, "saved_at": None, "diffs": []}
+        diffs = calc_diff(articles, snapshot)
+        return {"status": "ok", "snapshot_exists": True, "saved_at": snapshot.get("saved_at"), "diffs": diffs}
+    except QiitaAPIError as e:
+        return JSONResponse(status_code=401, content={"status": "error", "message": str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": f"予期しないエラー: {e}"})
+
+
+@app.post("/api/snapshot/save")
+async def api_snapshot_save():
+    token = get_token()
+    if not token:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "message": "QIITA_TOKEN が設定されていません。.env を確認してください。"},
+        )
+    try:
+        articles = await asyncio.to_thread(fetch_all_articles, token)
+        await asyncio.to_thread(save_snapshot, articles)
+        snapshot = load_snapshot()
+        return {"status": "ok", "saved_at": snapshot["saved_at"], "count": len(articles)}
+    except QiitaAPIError as e:
+        return JSONResponse(status_code=401, content={"status": "error", "message": str(e)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"status": "error", "message": f"予期しないエラー: {e}"})
 
 
 @app.get("/api/articles")
