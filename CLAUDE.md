@@ -57,8 +57,14 @@ Qiita API トークンを `.env` に設定するだけで即起動でき、ロ�
 
 | ユーザーの発言例 | 使うサブエージェント | ファイル |
 |----------------|----------------|---------|
-| 「詳細設計して」「設計書を作って」「どう実装するか設計して」 | design | `.claude/agents/design.md` |
-| 「セキュリティチェックして」「脆弱性確認して」「セキュリティ監査して」 | security-auditor | `.claude/agents/security-auditor.md` |
+| 「詳細設計して」「設計書を作って」「どう実装するか設計して」 | design | `.claude/agents/design/design.md` |
+| 「レビューして」「コードチェックして」 | code-reviewer | `.claude/agents/review/code-reviewer.md` |
+| 「セキュリティチェックして」「脆弱性確認して」「セキュリティ監査して」 | security-auditor | `.claude/agents/review/security-auditor.md` |
+| 「パフォーマンスチェックして」「N+1確認して」「ループ確認して」「複雑度チェックして」 | complexity-checker | `.claude/agents/review/complexity-checker.md` |
+| 「リントして」「コード整形して」「フォーマットして」 | lint-fixer | `.claude/agents/ci/lint-fixer.md` |
+| 「フィクスチャ作って」「モックデータ作って」「テストデータ生成して」 | fixture-generator | `.claude/agents/test/fixture-generator.md` |
+| 「カバレッジ確認して」「テスト網羅率チェックして」 | coverage-reporter | `.claude/agents/test/coverage-reporter.md` |
+| 「READMEを更新して」「ドキュメント更新して」 | readme-updater | `.claude/agents/doc/readme-updater.md` |
 
 > design はコードベース調査だけで完結するタスクのため、ヒアリング不要なサブエージェントとして構成しています。基本的には plan スキルの内部から呼び出されます。
 > security-auditor は実装完了後に自動的に呼び出されるほか、単独でセキュリティ監査を依頼することもできます。
@@ -77,17 +83,35 @@ Qiita API トークンを `.env` に設定するだけで即起動でき、ロ�
 1. /plan → 要件定義・詳細設計・実装提案（承認まで）
 2. /issue-create → GitHub Issue 作成
 3. /issue <番号> → 実装 & コミット
-4. **実装完了後、自動的に code-reviewer サブエージェントを起動してコードレビューを実施する**
-5. **code-reviewer 完了後、自動的に security-auditor サブエージェントを起動してセキュリティ監査を実施する**
-6. **security-auditor 完了後、自動的に test-writer サブエージェントを起動してテストコードを生成・書き込む**
-7. **test-writer 完了後、自動的に test-runner サブエージェントを起動してテストを実行・結果をレポートする**
-8. /pr-create → PR 作成
+4. **実装完了後、自動的に lint-fixer サブエージェントを起動してコードを自動整形する**
+5. **lint-fixer 完了後、自動的に code-reviewer サブエージェントを起動してコードレビューを実施する**
+6. **code-reviewer 完了後、自動的に complexity-checker サブエージェントを起動してN+1・ループ・ネスト問題を検出する**
+7. **complexity-checker 完了後、自動的に security-auditor サブエージェントを起動してセキュリティ監査を実施する**
+8. **security-auditor 完了後、自動的に fixture-generator サブエージェントを起動してモックデータを生成する**
+9. **fixture-generator 完了後、自動的に test-writer サブエージェントを起動してテストコードを生成・書き込む**
+10. **test-writer 完了後、自動的に test-runner サブエージェントを起動してテストを実行・結果をレポートする**
+11. **test-runner 完了後、自動的に coverage-reporter サブエージェントを起動してカバレッジを分析する**
+12. **coverage-reporter 完了後、自動的に readme-updater サブエージェントを起動してREADMEを最新状態に更新する**
+13. /pr-create → PR 作成
 
-> - code-reviewer はバグ・命名規則違反・エラーハンドリング漏れを指摘します。指摘内容をもとに修正してからセキュリティ監査に進んでください。
-> - security-auditor はトークンのハードコード・XSS・インジェクション等のセキュリティ問題を検出します。[CRITICAL] / [HIGH] の指摘は必ず修正してからテストに進んでください。
-> - test-writer は実装コードを変更せず、テストファイルの生成のみを行います。
-> - test-runner はテストコードを生成せず、pytest の実行と結果分析のみを行います。
-> - テストが失敗した場合、test-runner の指摘をもとに修正してから PR を作成してください。
+> **各エージェントの担当範囲（ファイルの書き込み権限）:**
+> | エージェント | 担当 | 書き込み可能ファイル |
+> |---|---|---|
+> | lint-fixer | コードスタイル・フォーマットの自動修正 | `app.py`, `src/**/*.py` |
+> | code-reviewer | バグ・命名規則・エラーハンドリングの指摘のみ（修正しない） | なし（読み取り専用） |
+> | complexity-checker | N+1・多重ループ・深いネストの指摘のみ（修正しない） | なし（読み取り専用） |
+> | security-auditor | セキュリティ問題の指摘のみ（修正しない） | なし（読み取り専用） |
+> | fixture-generator | Qiita APIのモックJSONデータ生成 | `tests/fixtures/*.json` |
+> | test-writer | テストコード・conftest.py の生成 | `tests/**/*.py` |
+> | test-runner | pytest 実行・結果レポート・coverage.json 生成 | なし（実行専用） |
+> | coverage-reporter | coverage.json を読んでカバレッジ分析・改善提案 | なし（読み取り専用） |
+> | readme-updater | README.md の自動更新 | `README.md` |
+>
+> **各ステップの停止条件:**
+> - lint-fixer: `[ERROR]` の残存問題があれば手動修正してから次へ
+> - code-reviewer / complexity-checker / security-auditor: `[CRITICAL]` / `[HIGH]` の指摘があれば修正してから次へ
+> - test-runner: テストが失敗した場合は修正してから PR を作成する
+> - coverage-reporter: 50%未満のファイルがあれば test-writer でテストを追加することを検討する
 
 ---
 
