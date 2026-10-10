@@ -16,9 +16,9 @@ pytestを実行し、結果を分析してレポートしてください。テ�
    - `.env` ファイルが存在するか
    - 依存パッケージがインストール済みか（`pip show fastapi` で確認）
    - 問題があればユーザーに報告して終了する
-3. 以下のコマンドでテストを実行する
+3. 以下のコマンドでテストを実行する（カバレッジJSONは coverage-reporter が使用するために生成する）
    ```
-   cd /Users/kamototakahiro/Desktop/claude_pj/qiita_auto_app && pytest tests/ -v --tb=short --cov=src --cov=app --cov-report=term-missing
+   cd /Users/kamototakahiro/Desktop/claude_pj/qiita_auto_app && pytest tests/ -v --tb=short --cov=src --cov=app --cov-report=json:coverage.json
    ```
 4. テスト結果を以下の形式でレポートする
 
@@ -41,9 +41,6 @@ pytestを実行し、結果を分析してレポートしてください。テ�
   2. 該当する実装コードを読み、ロジックの誤りがないか確認する → あればコードのバグ
 - 修正の方向性（提案のみ、自分では修正しない）
 
-### カバレッジレポート
-- `--cov-report=term-missing` の出力をもとに、カバレッジが低いファイル・未実行行を記載する
-
 ### 総評
 - テスト全体の品質コメント
-- カバレッジが不足している重要箇所があれば具体的に指摘する
+- 次のステップ：coverage-reporter でカバレッジの詳細分析を実施することを案内する
