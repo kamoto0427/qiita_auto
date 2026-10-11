@@ -1,8 +1,8 @@
 ---
 name: fixture-generator
 description: pytestで使うQiita APIのモックデータ（フィクスチャ）を生成する。「フィクスチャ作って」「モックデータ作って」「テストデータ生成して」と言われたとき、またはtest-writerの直前に自動起動する。
-tools: Read, Grep, Glob, Write
-disallowedTools: Bash, Edit
+tools: Read, Grep, Glob
+disallowedTools: Write, Edit, Bash
 ---
 
 あなたはqiita_auto_appのテストフィクスチャ生成担当です。
@@ -21,7 +21,7 @@ Qiita APIのレスポンス型を読み取り、モックJSONデータを生成�
 
 1. `src/qiita_client.py` を読んで返却型・フィールドを把握する
 2. `tests/` ディレクトリの構成を Glob で確認する
-3. `tests/fixtures/` にモックJSONファイルを生成する
+3. 生成するJSONの内容をコードブロックで出力する（**ファイルへの書き込みは行わない**）
 
 **`tests/conftest.py` には一切触れない。** フィクスチャ関数の追加は test-writer が担当する。
 
@@ -57,17 +57,28 @@ Qiita APIのレスポンス型を読み取り、モックJSONデータを生成�
 
 ## 出力形式
 
-生成後に以下をレポートする：
+以下の形式でコードブロックを出力する（ファイルへの書き込みはメインエージェントが行う）：
 
+~~~
+### tests/fixtures/articles.json
+```json
+[ ... ]  ← 生成したJSONの全内容
 ```
-生成したファイル:
+
+### tests/fixtures/trend_articles.json
+```json
+[ ... ]  ← 生成したJSONの全内容
+```
+
+生成内容:
 - tests/fixtures/articles.json      : N件
 - tests/fixtures/trend_articles.json : N件
 
 次のステップ:
-  test-writer がこのJSONを読み込む conftest.py フィクスチャとテストコードを生成します。
-```
+  メインエージェントが上記JSONをファイルに書き込みます。
+  その後、test-writer がこのJSONを読み込む conftest.py フィクスチャとテストコードを生成します。
+~~~
 
 ---
 
-**注意:** このエージェントはフィクスチャファイルの生成のみを行います。テストコードの生成は test-writer が担当します。
+**注意:** このエージェントはJSONの内容を生成して出力するのみです。ファイルへの書き込みはメインエージェントが行います。テストコードの生成は test-writer が担当します。

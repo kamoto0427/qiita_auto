@@ -1,0 +1,57 @@
+[
+  {
+    "id": "trend1234567890tr001",
+    "title": "Claude Code で実現する AI 駆動開発ワークフロー",
+    "url": "https://qiita.com/test_user/items/trend1234567890tr001",
+    "created_at": "2024-06-10T10:00:00+09:00",
+    "likes_count": 95,
+    "stocks_count": 47,
+    "comments_count": 12,
+    "tags": ["AI", "ClaudeCode", "開発効率化"],
+    "user": "ai_developer_01"
+  },
+  {
+    "id": "trend1234567890tr002",
+    "title": "LangChain × FastAPI で作る RAG アプリケーション",
+    "url": "https://qiita.com/test_user/items/trend1234567890tr002",
+    "created_at": "2024-06-15T14:00:00+09:00",
+    "likes_count": 78,
+    "stocks_count": 38,
+    "comments_count": 5,
+    "tags": ["LangChain", "FastAPI", "RAG", "Python"],
+    "user": "ml_engineer_02"
+  },
+  {
+    "id": "trend1234567890tr003",
+    "title": "GitHub Copilot を活用したコードレビュー自動化",
+    "url": "https://qiita.com/test_user/items/trend1234567890tr003",
+    "created_at": "2024-06-22T09:30:00+09:00",
+    "likes_count": 64,
+    "stocks_count": 29,
+    "comments_count": 3,
+    "tags": ["GitHubCopilot", "CodeReview", "自動化"],
+    "user": "devops_engineer_03"
+  },
+  {
+    "id": "trend1234567890tr004",
+    "title": "GPT-4 API で作るコンテンツ生成ツール — コスト最適化も解説",
+    "url": "https://qiita.com/test_user/items/trend1234567890tr004",
+    "created_at": "2024-07-03T11:00:00+09:00",
+    "likes_count": 0,
+    "stocks_count": 0,
+    "comments_count": 0,
+    "tags": ["OpenAI", "GPT-4", "Python"],
+    "user": "startup_dev_04"
+  },
+  {
+    "id": "trend1234567890tr005",
+    "title": "AI エージェント設計パターン — タスク分解とツール活用",
+    "url": "https://qiita.com/test_user/items/trend1234567890tr005",
+    "created_at": "2024-07-18T16:45:00+09:00",
+    "likes_count": 52,
+    "stocks_count": 24,
+    "comments_count": 8,
+    "tags": [],
+    "user": "agent_researcher_05"
+  }
+]

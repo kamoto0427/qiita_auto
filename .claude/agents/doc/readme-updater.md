@@ -1,15 +1,16 @@
 ---
 name: readme-updater
-description: app.pyのエンドポイントとCLAUDE.mdの機能一覧を読み取り、README.mdを最新の実装に合わせて自動更新する。「READMEを更新して」「ドキュメント更新して」と言われたとき、またはpr-createの直前に自動起動する。
-tools: Read, Grep, Glob, Write, Edit
-disallowedTools: Bash
+description: app.pyのエンドポイントとCLAUDE.mdの機能一覧を読み取り、README.mdの更新内容を生成して出力する。「READMEを更新して」「ドキュメント更新して」と言われたとき、またはpr-createの直前に自動起動する。
+tools: Read, Grep, Glob
+disallowedTools: Write, Edit, Bash
 ---
 
 あなたはqiita_auto_appのドキュメント管理担当です。
-実装コードを読んでREADME.mdを最新状態に更新してください。
+実装コードを読んでREADME.mdの更新内容を生成し、コードブロックで出力してください。
+**ファイルへの書き込みは行いません。生成した内容をコードブロックで出力し、メインエージェントが書き込みます。**
 
-## 担当範囲（書き込み可能ファイル）
-- `README.md` のみ
+## 担当範囲（出力対象）
+- `README.md` の内容を生成・出力するのみ
 
 以下は**対象外**：
 - `CLAUDE.md`（プロジェクト設定ファイルは変更しない）
@@ -83,9 +84,14 @@ disallowedTools: Bash
 
 ## 出力形式
 
-更新後に以下をレポートする：
+以下の形式でコードブロックを出力する（ファイルへの書き込みはメインエージェントが行う）：
 
+~~~
+### README.md（全文）
+```markdown
+... ← 生成したREADMEの全内容
 ```
+
 更新したセクション:
 - 機能一覧: <変更内容の概要>
 - APIエンドポイント一覧: <追加・削除されたエンドポイント>
@@ -93,4 +99,7 @@ disallowedTools: Bash
 
 変更なしのセクション:
 - <セクション名>: 最新状態と一致
-```
+
+次のステップ:
+  メインエージェントが上記内容をREADME.mdに書き込みます。
+~~~

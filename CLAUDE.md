@@ -61,6 +61,7 @@ Qiita API トークンを `.env` に設定するだけで即起動でき、ロ�
 | 「レビューして」「コードチェックして」 | code-reviewer | `.claude/agents/review/code-reviewer.md` |
 | 「セキュリティチェックして」「脆弱性確認して」「セキュリティ監査して」 | security-auditor | `.claude/agents/review/security-auditor.md` |
 | 「パフォーマンスチェックして」「N+1確認して」「ループ確認して」「複雑度チェックして」 | complexity-checker | `.claude/agents/review/complexity-checker.md` |
+| 「コミットして」「PRを作って」の直前・「情報漏洩チェックして」「コミット前チェックして」 | pre-commit-checker | `.claude/agents/review/pre-commit-checker.md` |
 | 「リントして」「コード整形して」「フォーマットして」 | lint-fixer | `.claude/agents/ci/lint-fixer.md` |
 | 「フィクスチャ作って」「モックデータ作って」「テストデータ生成して」 | fixture-generator | `.claude/agents/test/fixture-generator.md` |
 | 「カバレッジ確認して」「テスト網羅率チェックして」 | coverage-reporter | `.claude/agents/test/coverage-reporter.md` |
@@ -85,14 +86,15 @@ Qiita API トークンを `.env` に設定するだけで即起動でき、ロ�
 3. /issue <番号> → 実装 & コミット
 4. **実装完了後、自動的に lint-fixer サブエージェントを起動してコードを自動整形する**
 5. **lint-fixer 完了後、自動的に code-reviewer サブエージェントを起動してコードレビューを実施する**
-6. **code-reviewer 完了後、自動的に complexity-checker サブエージェントを起動してN+1・ループ・ネスト問題を検出する**
-7. **complexity-checker 完了後、自動的に security-auditor サブエージェントを起動してセキュリティ監査を実施する**
-8. **security-auditor 完了後、自動的に fixture-generator サブエージェントを起動してモックデータを生成する**
-9. **fixture-generator 完了後、自動的に test-writer サブエージェントを起動してテストコードを生成・書き込む**
-10. **test-writer 完了後、自動的に test-runner サブエージェントを起動してテストを実行・結果をレポートする**
-11. **test-runner 完了後、自動的に coverage-reporter サブエージェントを起動してカバレッジを分析する**
-12. **coverage-reporter 完了後、自動的に readme-updater サブエージェントを起動してREADMEを最新状態に更新する**
-13. /pr-create → PR 作成
+6. **code-reviewer 完了後、自動的に pre-commit-checker サブエージェントを起動してコミット前の情報漏洩リスクを確認する**
+7. **pre-commit-checker 完了後、自動的に complexity-checker サブエージェントを起動してN+1・ループ・ネスト問題を検出する**
+8. **complexity-checker 完了後、自動的に security-auditor サブエージェントを起動してセキュリティ監査を実施する**
+9. **security-auditor 完了後、自動的に fixture-generator サブエージェントを起動してモックデータを生成・出力する（メインエージェントが実際にファイルへ書き込む）**
+10. **fixture-generator 完了後、自動的に test-writer サブエージェントを起動してテストコードを生成・出力する（メインエージェントが実際にファイルへ書き込む）**
+11. **test-writer 完了後、自動的に test-runner サブエージェントを起動してテストを実行・結果をレポートする**
+12. **test-runner 完了後、自動的に coverage-reporter サブエージェントを起動してカバレッジを分析する**
+13. **coverage-reporter 完了後、自動的に readme-updater サブエージェントを起動してREADMEの更新内容を生成・出力する（メインエージェントが実際にファイルへ書き込む）**
+14. /pr-create → PR 作成
 
 > **各エージェントの担当範囲（ファイルの書き込み権限）:**
 > | エージェント | 担当 | 書き込み可能ファイル |
@@ -101,17 +103,19 @@ Qiita API トークンを `.env` に設定するだけで即起動でき、ロ�
 > | code-reviewer | バグ・命名規則・エラーハンドリングの指摘のみ（修正しない） | なし（読み取り専用） |
 > | complexity-checker | N+1・多重ループ・深いネストの指摘のみ（修正しない） | なし（読み取り専用） |
 > | security-auditor | セキュリティ問題の指摘のみ（修正しない） | なし（読み取り専用） |
-> | fixture-generator | Qiita APIのモックJSONデータ生成 | `tests/fixtures/*.json` |
-> | test-writer | テストコード・conftest.py の生成 | `tests/**/*.py` |
+> | fixture-generator | Qiita APIのモックJSONデータ生成（内容をコードブロックで出力） | なし（出力専用）|
+> | test-writer | テストコード・conftest.py の生成（内容をコードブロックで出力） | なし（出力専用）|
 > | test-runner | pytest 実行・結果レポート・coverage.json 生成 | なし（実行専用） |
 > | coverage-reporter | coverage.json を読んでカバレッジ分析・改善提案 | なし（読み取り専用） |
-> | readme-updater | README.md の自動更新 | `README.md` |
+> | readme-updater | README.md の更新内容を生成（内容をコードブロックで出力） | なし（出力専用）|
+> | pre-commit-checker | コミット前の情報漏洩・機密ファイル混入リスクの検出 | なし（読み取り専用） |
 >
 > **各ステップの停止条件:**
 > - lint-fixer: `[ERROR]` の残存問題があれば手動修正してから次へ
 > - code-reviewer / complexity-checker / security-auditor: `[CRITICAL]` / `[HIGH]` の指摘があれば修正してから次へ
 > - test-runner: テストが失敗した場合は修正してから PR を作成する
 > - coverage-reporter: 50%未満のファイルがあれば test-writer でテストを追加することを検討する
+> - pre-commit-checker: `[CRITICAL]` / `[HIGH]` の指摘があれば修正してから PR を作成する
 
 ---
 

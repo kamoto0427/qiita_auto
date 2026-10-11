@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+venv/
+.DS_Store
+data/snapshot.json
+coverage.json
+.coverage
+htmlcov/
+source-refarences/

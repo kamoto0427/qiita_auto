@@ -1,0 +1,92 @@
+[
+  {
+    "id": "abc1234567890abc0001",
+    "title": "FastAPI で作る REST API 入門",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0001",
+    "created_at": "2024-01-15T10:00:00+09:00",
+    "likes_count": 42,
+    "stocks_count": 18,
+    "tags": ["Python", "FastAPI"]
+  },
+  {
+    "id": "abc1234567890abc0002",
+    "title": "Python で始める機械学習 入門ガイド",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0002",
+    "created_at": "2024-01-28T14:30:00+09:00",
+    "likes_count": 87,
+    "stocks_count": 35,
+    "tags": ["Python", "機械学習", "scikit-learn"]
+  },
+  {
+    "id": "abc1234567890abc0003",
+    "title": "Docker Compose で開発環境を構築する",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0003",
+    "created_at": "2024-02-05T09:00:00+09:00",
+    "likes_count": 61,
+    "stocks_count": 27,
+    "tags": ["Docker", "DockerCompose", "DevEnvironment"]
+  },
+  {
+    "id": "abc1234567890abc0004",
+    "title": "GitHub Actions で CI/CD パイプラインを作る",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0004",
+    "created_at": "2024-02-20T11:15:00+09:00",
+    "likes_count": 100,
+    "stocks_count": 50,
+    "tags": ["GitHub", "GitHubActions", "CI/CD"]
+  },
+  {
+    "id": "abc1234567890abc0005",
+    "title": "pytest 実践入門 — フィクスチャとモックを使いこなす",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0005",
+    "created_at": "2024-03-10T08:45:00+09:00",
+    "likes_count": 55,
+    "stocks_count": 22,
+    "tags": ["Python", "pytest", "テスト"]
+  },
+  {
+    "id": "abc1234567890abc0006",
+    "title": "タグなし記事のエッジケーステスト用データ",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0006",
+    "created_at": "2024-03-25T16:00:00+09:00",
+    "likes_count": 7,
+    "stocks_count": 3,
+    "tags": []
+  },
+  {
+    "id": "abc1234567890abc0007",
+    "title": "いいね0件の記事 — エッジケーステスト用",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0007",
+    "created_at": "2024-04-01T12:00:00+09:00",
+    "likes_count": 0,
+    "stocks_count": 0,
+    "tags": ["Python"]
+  },
+  {
+    "id": "abc1234567890abc0008",
+    "title": "TypeScript と React で作るモダンフロントエンド",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0008",
+    "created_at": "2024-04-18T13:30:00+09:00",
+    "likes_count": 73,
+    "stocks_count": 31,
+    "tags": ["TypeScript", "React", "Frontend"]
+  },
+  {
+    "id": "abc1234567890abc0009",
+    "title": "AWS Lambda と API Gateway でサーバーレス API を構築する",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0009",
+    "created_at": "2024-05-07T10:00:00+09:00",
+    "likes_count": 34,
+    "stocks_count": 15,
+    "tags": ["AWS", "Lambda", "Serverless", "Python"]
+  },
+  {
+    "id": "abc1234567890abc0010",
+    "title": "SQLAlchemy 2.0 で覚えるモダンな ORM 設計",
+    "url": "https://qiita.com/test_user/items/abc1234567890abc0010",
+    "created_at": "2024-05-30T09:20:00+09:00",
+    "likes_count": 48,
+    "stocks_count": 20,
+    "tags": ["Python", "SQLAlchemy", "Database"]
+  }
+]
